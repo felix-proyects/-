@@ -8,8 +8,8 @@ subBots.push(global.conn.user.jid)
 const chat = global.db.data.chats[m.chat]
 const mentionedJid = await m.mentionedJid
 const who = mentionedJid[0] ? mentionedJid[0] : m.quoted ? await m.quoted.sender : false
-if (!who) return conn.reply(m.chat, `❀ Por favor, menciona a un Socket para hacerlo Bot principal del grupo.`, m)
-if (!subBots.includes(who)) return conn.reply(m.chat, `ꕥ El usuario mencionado no es un Socket de: *${botname}*.`, m)
+if (!who) return conn.reply(m.chat, `❀ Por favor, menciona a un Socket para hacerlo Bot principal del grupo.`, m, fake)
+if (!subBots.includes(who)) return conn.reply(m.chat, `ꕥ El usuario mencionado no es un Socket de Deymoon Club`, m, fake)
 if (chat.primaryBot === who) {
 return conn.reply(m.chat, `ꕥ @${who.split`@`[0]} ya esta como Bot primario en este grupo.`, m, { mentions: [who] });
 }
