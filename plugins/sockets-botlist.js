@@ -1,47 +1,102 @@
-import ws from "ws"
+import ws from 'ws'
+import { join } from 'path'
+import fs from 'fs'
 
-const handler = async (m, { conn, command, usedPrefix, participants }) => {
-try {
-const users = [global.conn.user.jid, ...new Set(global.conns.filter((conn) => conn.user && conn.ws.socket && conn.ws.socket.readyState !== ws.CLOSED).map((conn) => conn.user.jid))]
-function convertirMsADiasHorasMinutosSegundos(ms) {
-const segundos = Math.floor(ms / 1000)
-const minutos = Math.floor(segundos / 60)
-const horas = Math.floor(minutos / 60)
-const días = Math.floor(horas / 24)
-const segRest = segundos % 60
-const minRest = minutos % 60
-const horasRest = horas % 24
-let resultado = ""
-if (días) resultado += `${días} días, `
-if (horasRest) resultado += `${horasRest} horas, `
-if (minRest) resultado += `${minRest} minutos, `
-if (segRest) resultado += `${segRest} segundos`
-return resultado.trim()
+let handler = async (m, { conn }) => {
+  const mainBotConn = global.conn
+
+  if (!global.conns || !Array.isArray(global.conns)) global.conns = []
+
+  global.conns = global.conns.filter(subConn => {
+    return subConn.user?.jid && subConn.ws?.socket?.readyState === ws.OPEN
+  })
+
+  let totalSubs = 0
+  let totalPremium = 0
+  let totalTemporales = 0
+
+  for (let subConn of global.conns) {
+    const subBotNumber = subConn.user.jid.split('@')[0]
+    const subBotConfigPath = join('./JadiBot', subBotNumber, 'config.json')
+
+    let premium = false
+    let temporal = false
+
+    if (fs.existsSync(subBotConfigPath)) {
+      try {
+        const subBotConfig = JSON.parse(fs.readFileSync(subBotConfigPath, 'utf-8'))
+        if (subBotConfig.premium === true) premium = true
+        if (subBotConfig.type && subBotConfig.type.toLowerCase() === 'temporal') temporal = true
+      } catch {}
+    }
+
+    if (premium) totalPremium++
+    else if (temporal) totalTemporales++
+    else totalSubs++
+  }
+
+  const totalPrincipales = 1
+  const totalBots = totalPrincipales + totalPremium + totalSubs + totalTemporales
+  const sesiones = totalBots.toLocaleString()
+
+  let botsEnGrupo = 0
+  let botsEnGrupoDetalles = []
+
+  function botTipoNombre(subConn) {
+    const subBotNumber = subConn.user.jid.split('@')[0]
+    const subBotConfigPath = join('./serbots', subBotNumber, 'config.json')
+    if (fs.existsSync(subBotConfigPath)) {
+      try {
+        const subBotConfig = JSON.parse(fs.readFileSync(subBotConfigPath, 'utf-8'))
+        if (subBotConfig.premium === true) return 'Premium'
+        if (subBotConfig.type && subBotConfig.type.toLowerCase() === 'temporal') return 'Temporal'
+      } catch {}
+    }
+    return 'Sub'
+  }
+
+  if (mainBotConn.chats && mainBotConn.chats[m.chat]) {
+    botsEnGrupo++
+    botsEnGrupoDetalles.push({
+      jid: mainBotConn.user.jid,
+      tipo: 'Principal'
+    })
+  }
+
+  for (let subConn of global.conns) {
+    if (subConn.chats && subConn.chats[m.chat]) {
+      botsEnGrupo++
+      botsEnGrupoDetalles.push({
+        jid: subConn.user.jid,
+        tipo: botTipoNombre(subConn)
+      })
+    }
+  }
+
+  let txt = `ꕥ Lista de bots activos (*${sesiones}* sesiones)\n\n`
+  txt += `✿ Principales » *${totalPrincipales}* sesiones\n`
+  txt += `ⴵ Premiums » *${totalPremium}* sesiones\n`
+  txt += `❖ Subs » *${totalSubs}* sesiones\n`
+  txt += `✰ Temporales » *${totalTemporales}* sesiones\n\n`
+
+  txt += `❏ En este grupo: *${botsEnGrupo}*\n`
+
+  if (botsEnGrupo > 0) {
+    for (let b of botsEnGrupoDetalles) {
+      const numero = b.jid.split('@')[0]
+      txt += `\t\t🜸 [${b.tipo}] » @${numero}\n`
+    }
+  } else {
+    txt += '\t\t🜸 Ningún bot en este grupo\n'
+  }
+
+  const mentions = botsEnGrupoDetalles.map(b => b.jid)
+
+  await conn.sendMessage(m.chat, { text: txt, mentions, contextInfo: { ...m.contextInfo, mentionedJid: mentions }
+  }, { quoted: m })
 }
-let groupBots = users.filter((bot) => participants.some((p) => p.id === bot))
-if (participants.some((p) => p.id === global.conn.user.jid) && !groupBots.includes(global.conn.user.jid)) { groupBots.push(global.conn.user.jid) }
-const botsGroup = groupBots.length > 0 ? groupBots.map((bot) => {
-const isMainBot = bot === global.conn.user.jid
-const v = global.conns.find((conn) => conn.user.jid === bot)
-const uptime = isMainBot ? convertirMsADiasHorasMinutosSegundos(Date.now() - global.conn.uptime) : v?.uptime ? convertirMsADiasHorasMinutosSegundos(Date.now() - v.uptime) : "Activo desde ahora"
-const mention = bot.replace(/[^0-9]/g, '')
-return `@${mention}\n> Bot: ${isMainBot ? 'Principal' : 'Sub-Bot'}\n> Online: ${uptime}`}).join("\n\n") : `✧ No hay bots activos en este grupo`
-const message = `*「 ✦ 」 Lista de bots activos*
 
-❀ Principal: *1*
-✿ Subs: *${users.length - 1}*
-
-❏ En este grupo: *${groupBots.length}* bots
-${botsGroup}`
-const mentionList = groupBots.map(bot => bot.endsWith("@s.whatsapp.net") ? bot : `${bot}@s.whatsapp.net`)
-rcanal.contextInfo.mentionedJid = mentionList
-await conn.sendMessage(m.chat, { text: message, ...rcanal }, { quoted: m })
-} catch (error) {
-m.reply(`⚠︎ Se ha producido un problema.\n> Usa *${usedPrefix}report* para informarlo.\n\n${error.message}`)
-}}
-
-handler.tags = ["serbot"]
-handler.help = ["botlist"]
-handler.command = ["botlist", "listbots", "listbot", "bots", "sockets", "socket"]
-
+handler.command = ['sockets', 'bots']
+handler.help = ['sockets', 'bots']
+handler.tags = ['socket']
 export default handler
