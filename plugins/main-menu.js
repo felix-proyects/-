@@ -1,3 +1,4 @@
+
 import fs from 'fs'
 import { join } from 'path'
 
@@ -265,7 +266,7 @@ Aǫᴜɪ ᴛɪᴇɴᴇs ʟᴀ ʟɪsᴛᴀ ᴅᴇ ᴄᴏᴍᴀɴᴅᴏs:
 
 ╭┈ࠢ͜─ׄ֟፝͜─ׄ͜─ׄ͜╴𐔌 *GROUPS* 𐦯╶͜─ׄ͜─ׄ֟፝͜─ׄ͜─ׄ͜
 > ✿ Comandos para *Administradores* de grupos.
-✦ *#tag • #hidetag • #invocar • #tagall* + [mensaje]
+✦ *#tag • #hidetag* + [mensaje]
 > ⸙ Envía un mensaje mencionando a todos los usuarios del grupo.
 ✦ *#detect • #alertas* + [enable/disable]
 > ⸙ Activar/desactivar las alertas de promote/demote
