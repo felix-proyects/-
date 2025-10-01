@@ -1,96 +1,43 @@
-import fs from 'fs'
-import path from 'path'
-import axios from 'axios'
-import FormData from 'form-data'
-import { fileTypeFromBuffer } from 'file-type'
+//--> Hecho por Ado-rgb (github.com/Ado-rgb)
+// •|• No quites créditos..
 
-async function uploadToFreeImageHost(buffer) {
-  try {
-    const form = new FormData()
-    form.append('source', buffer, 'file')
-    const res = await axios.post('https://freeimage.host/api/1/upload', form, {
-      params: {
-        key: '6d207e02198a847aa98d0a2a901485a5' // Cambia si se acaba la cuota
-      },
-      headers: form.getHeaders()
-    })
-    return res.data.image.url
-  } catch (err) {
-    console.error('Error FreeImageHost:', err?.response?.data || err.message)
-    return null
-  }
-}
-
-const handler = async (m, { conn, command }) => {
-  const senderNumber = m.sender.replace(/[^0-9]/g, '')
-  const botPath = path.join('./JadiBots', senderNumber)
-  const configPath = path.join(botPath, 'config.json')
-
-  if (!fs.existsSync(botPath)) {
-    return m.reply('❖ El comando *setbanner* solo puede ser usado por el dueño del número del *bot*.')
+let handler = async (m, { conn, text }) => {
+  if (!text || !text.endsWith('@g.us')) {
+    return m.reply('☆ Uso correcto:\n> .delprimary 120363xxxxxx@g.us')
   }
 
-  try {
-    const q = m.quoted || m
-    const mime = (q.msg || q).mimetype || q.mediaType || ''
+  const groupId = text.trim()
 
-    if (!mime || !/image\/(jpe?g|png|webp)/.test(mime)) {
-      return conn.sendMessage(m.chat, {
-        text: `ꕤ Responde a una imagen.`,
-      }, { quoted: m })
+  try {
+    const metadata = await conn.groupMetadata(groupId)
+    const participants = metadata.participants
+    const userInGroup = participants.find(p => p.id === m.sender)
+
+    if (!userInGroup) return m.reply('No estás en ese grupo.')
+
+    // validar admin
+    if (!userInGroup.admin && userInGroup.role !== 'admin' && userInGroup.role !== 'superadmin') {
+      return m.reply('☆ No sos admin en ese grupo.')
     }
 
-    // Reacción de carga
-    await conn.sendMessage(m.chat, {
-      react: { text: '🕣', key: m.key }
-    })
+    if (!global.db.data.chats[groupId]) global.db.data.chats[groupId] = {}
 
-    // Descargar imagen
-    const media = await q.download()
-    if (!media) throw new Error('⊹ No fue posible cambiar la imagen del socket.')
+    if (!global.db.data.chats[groupId].primaryBot) {
+      return m.reply('Ese grupo no tiene un bot primario asignado.')
+    }
 
-    // Guardar temporal
-    const tempDir = './tmp'
-    if (!fs.existsSync(tempDir)) fs.mkdirSync(tempDir)
-    const { ext } = await fileTypeFromBuffer(media) || { ext: 'png' }
-    const tempPath = path.join(tempDir, `banner_${Date.now()}.${ext}`)
-    fs.writeFileSync(tempPath, media)
+    delete global.db.data.chats[groupId].primaryBot
+    global.db.data.chats[groupId].allBots = true
 
-    // Subir a FreeImage.Host
-    const uploadedUrl = await uploadToFreeImageHost(media)
-    if (!uploadedUrl) throw new Error('☆ Error ejecutando la imagen. ')
-
-    // Guardar en config.json
-    const config = fs.existsSync(configPath)
-      ? JSON.parse(fs.readFileSync(configPath))
-      : {}
-    config.banner = uploadedUrl
-    fs.writeFileSync(configPath, JSON.stringify(config, null, 2))
-
-    await conn.sendMessage(m.chat, {
-      text: `ꕤ La foto del bot fue cambiada!`,
-    }, { quoted: m })
-
-    await conn.sendMessage(m.chat, {
-      react: { text: '✅', key: m.key }
-    })
-
-    // Borra el archivo temporal
-    fs.unlinkSync(tempPath)
-
-  } catch (err) {
-    console.error(err)
-    await conn.sendMessage(m.chat, {
-      text: '⊹ No se pudo subir la foto, inténtalo más tarde.',
-    }, { quoted: m })
-    await conn.sendMessage(m.chat, {
-      react: { text: '✖️', key: m.key }
-    })
+    m.reply(`☆ Se eliminó el bot primario del grupo:\n*${metadata.subject}*\n\nAhora todos los bots pueden responder.`)
+  } catch (e) {
+    console.error(e)
+    m.reply('☆ No pude acceder a ese grupo. Asegúrate de que el bot esté dentro del grupo y el ID sea correcto.')
   }
 }
 
-handler.help = ['setbanner']
+handler.help = ['delprimary <IDgrupoxxxx@g.us>']
 handler.tags = ['serbot']
-handler.command = /^setbanner$/i
-handler.owner = false
+handler.command = ['delprimary']
+
 export default handler
