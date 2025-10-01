@@ -4,10 +4,10 @@ import cheerio from 'cheerio'
 
 const handler = async (m, { text, conn, usedPrefix }) => {
 if (!db.data.chats[m.chat].nsfw && m.isGroup) {
-return m.reply(`ꕥ El contenido *NSFW* está desactivado en este grupo.\n\nUn *administrador* puede activarlo con el comando:\n» *${usedPrefix}nsfw on*`)
+return m.reply(`✿ El contenido *NSFW* está desactivado en este grupo.\n\nUn *administrador* puede activarlo con el comando:\n» *${usedPrefix}nsfw on*`)
 }
 if (!text) {
-return m.reply('❀ Por favor, ingresa el título o URL del video de *(xnxx)*.')
+return m.reply('✿ Por favor, ingresa el título o URL del video de *(xnxx)*.')
 }
 conn.xnxx = conn.xnxx || {}
 const isUrl = text.includes('xnxx.com')
@@ -27,7 +27,7 @@ await conn.sendFile(m.chat, dll, res.title + '.mp4', txt, m)
 await m.react('✔️')
 } catch (e) {
 await m.react('✖️')
-await conn.reply(m.chat, `⚠︎ Se ha producido un problema.\n> Usa *${usedPrefix}report* para informarlo.\n\n` + e, m)
+await conn.reply(m.chat, `✿ Se ha producido un problema.\n> Usa *${usedPrefix}report* para informarlo.\n\n` + e, m)
 }
 return
 }
@@ -72,7 +72,7 @@ const dll = res.result.files.high || res.result.files.low
 await conn.sendFile(m.chat, dll, res.title + '.mp4', txt, m)
 await m.react('✔️')
 } catch (e) {
-await m.reply(m.chat, `⚠︎ Se ha producido un problema.\n> Usa *${usedPrefix}report* para informarlo.\n\n` + e, m)
+await m.reply(m.chat, `✿ Se ha producido un problema.\n> Usa *${usedPrefix}report* para informarlo.\n\n` + e, m)
 await m.react('✖️')
 } finally {
 session.downloads++
