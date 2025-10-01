@@ -1,43 +1,35 @@
-//--> Hecho por Ado-rgb (github.com/Ado-rgb)
-// •|• No quites créditos..
+import ws from 'ws'
 
-let handler = async (m, { conn, text }) => {
-  if (!text || !text.endsWith('@g.us')) {
-    return m.reply('☆ Uso correcto:\n> .delprimary 120363xxxxxx@g.us')
+const handler = async (m, { conn, usedPrefix }) => {
+  const chat = global.db.data.chats[m.chat]
+
+  if (!chat.primaryBot) {
+    return conn.reply(m.chat, `⚠︎ No hay ningún Bot primario en este grupo.`, m)
   }
 
-  const groupId = text.trim()
-
   try {
-    const metadata = await conn.groupMetadata(groupId)
-    const participants = metadata.participants
-    const userInGroup = participants.find(p => p.id === m.sender)
+    const oldPrimary = chat.primaryBot
+    chat.primaryBot = null
 
-    if (!userInGroup) return m.reply('No estás en ese grupo.')
-
-    // validar admin
-    if (!userInGroup.admin && userInGroup.role !== 'admin' && userInGroup.role !== 'superadmin') {
-      return m.reply('☆ No sos admin en ese grupo.')
-    }
-
-    if (!global.db.data.chats[groupId]) global.db.data.chats[groupId] = {}
-
-    if (!global.db.data.chats[groupId].primaryBot) {
-      return m.reply('Ese grupo no tiene un bot primario asignado.')
-    }
-
-    delete global.db.data.chats[groupId].primaryBot
-    global.db.data.chats[groupId].allBots = true
-
-    m.reply(`☆ Se eliminó el bot primario del grupo:\n*${metadata.subject}*\n\nAhora todos los bots pueden responder.`)
+    conn.reply(
+      m.chat, 
+      `✧ Se ha eliminado el Bot primario @${oldPrimary.split`@`[0]}.\n> Ahora todos los bots vuelven a responder en este grupo.`, 
+      m, 
+      { mentions: [oldPrimary] }
+    )
   } catch (e) {
-    console.error(e)
-    m.reply('☆ No pude acceder a ese grupo. Asegúrate de que el bot esté dentro del grupo y el ID sea correcto.')
+    conn.reply(
+      m.chat, 
+      `⚠︎ Ocurrió un problema al intentar eliminar el Bot primario.\n> Usa *${usedPrefix}report* para informarlo.\n\n${e.message}`, 
+      m
+    )
   }
 }
 
-handler.help = ['delprimary <IDgrupoxxxx@g.us>']
-handler.tags = ['serbot']
+handler.help = ['delprimary']
+handler.tags = ['grupo']
 handler.command = ['delprimary']
+handler.group = true
+handler.admin = true  
 
 export default handler
