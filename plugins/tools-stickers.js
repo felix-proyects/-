@@ -25,7 +25,7 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
 
         const usuario = m.pushName || 'Desconocido';
 
-        const authorDinamico = `⊹ 👑Bot:\n⊹ ↳ @${nombreBot}\n\n👑 Usuario:\n⊹ ↳ @${usuario}`;
+        const authorDinamico = `⊹ 🐬 Deymoon🧠 Club\n↳ Deymoon.club/\n\n👹 Info:\n deymoon-club.vercel.app/\n⊹ 👑Bot:\n⊹ ↳ @${nombreBot}\n\n👑 Usuario:\n⊹ ↳ @${usuario}`;
 
         let q = m.quoted ? m.quoted : m;
         let mime = (q.msg || q).mimetype || q.mediaType || '';
