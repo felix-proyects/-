@@ -173,8 +173,8 @@ Aǫᴜɪ ᴛɪᴇɴᴇs ʟᴀ ʟɪsᴛᴀ ᴅᴇ ᴄᴏᴍᴀɴᴅᴏs:
 > ⸙ Salir de un grupo.
 ✦ *#logout*
 > ⸙ Cerrar sesion del bot.
-✦ *#setpfp • #setimage*
-> ⸙ Cambiar la imagen de perfil
+✦ *#setbanner • #setname*
+> ⸙ Cambiar la imagen nombre del bot
 ✦ *#setstatus* + [estado]
 > ⸙ Cambiar el estado del bot
 ✦ *#setusername* + [nombre]
