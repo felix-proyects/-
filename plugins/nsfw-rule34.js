@@ -3,8 +3,8 @@ import axios from 'axios'
 
 const handler = async (m, { conn, command, args, usedPrefix }) => {
 try {
-if (!db.data.chats[m.chat].nsfw && m.isGroup) return m.reply(`ꕥ El contenido *NSFW* está desactivado en este grupo.\n\nUn *administrador* puede activarlo con:\n» *${usedPrefix}nsfw on*`)
-if (!args[0]) return conn.reply(m.chat, `❀ Ingresa un tag para buscar.`, m)
+if (!db.data.chats[m.chat].nsfw && m.isGroup) return m.reply(`✿ El contenido *NSFW* está desactivado en este grupo.\n\nUn *administrador* puede activarlo con:\n» *${usedPrefix}nsfw on*`)
+if (!args[0]) return conn.reply(m.chat, `✿ Ingresa un tag para buscar.`, m)
 await m.react('🕒')
 const tag = args[0].replace(/\s+/g, '_')
 let mediaList = []
@@ -41,9 +41,9 @@ const valid = data.map(i => i?.image).filter(u => typeof u === 'string' && /\.(j
 if (valid.length) mediaList = [...new Set(valid)].sort(() => Math.random() - 0.5)
 break
 }}
-if (!mediaList.length) return conn.reply(m.chat, `ꕥ No se encontraron resultados para *${tag}*`, m)
+if (!mediaList.length) return conn.reply(m.chat, `✿ No se encontraron resultados para *${tag}*`, m)
 const media = mediaList[Math.floor(Math.random() * mediaList.length)]
-const caption = `❀ Resultados para » *${tag}*`
+const caption = `✿ Resultados para » *${tag}*`
 if (media.endsWith('.mp4')) {
 await conn.sendMessage(m.chat, { video: { url: media }, caption, mentions: [m.sender] })
 } else {
@@ -52,7 +52,7 @@ await conn.sendMessage(m.chat, { image: { url: media }, caption, mentions: [m.se
 await m.react('✔️')
 } catch (error) {
 await m.react('✖️')
-await conn.reply(m.chat, `⚠︎ Se ha producido un problema.\n> Usa *${usedPrefix}report* para informarlo.\n\n${error.message}`, m)
+await conn.reply(m.chat, `✿ Se ha producido un problema.\n> Usa *${usedPrefix}report* para informarlo.\n\n${error.message}`, m)
 }}
 
 handler.command = ['r34', 'rule34', 'rule', 'danbooru', 'dbooru', 'gelbooru', 'gbooru']
