@@ -11,7 +11,7 @@ user.exp = user.exp || 0
 user.lastDaily = user.lastDaily || 0
 if (now < user.lastDaily) {
 let wait = formatTime(Math.floor((user.lastDaily - now) / 1000))
-return conn.reply(m.chat, `ꕥ Ya has reclamado tu *Daily* de hoy.\n> Puedes reclamarlo de nuevo en *${wait}*`, m, fake)
+return conn.reply(m.chat, `ꕥ Ya has reclamado tu *Daily* de hoy.\n> Puedes reclamarlo de nuevo en *${wait}*`, m)
 }
 let lost = user.streak >= 1 && now - user.lastDailyGlobal > gap * 1.5
 if (lost) user.streak = 0
@@ -28,7 +28,7 @@ user.lastDaily = now + gap
 let nextReward = Math.min(20000 + user.streak * 5000, 1015000).toLocaleString()
 let msg = `> Día *${user.streak + 1}* » *+¥${nextReward}*`
 if (lost) msg += `\n> ☆ ¡Has perdido tu racha de días!`
-conn.reply(m.chat, `「✿」Has reclamado tu recompensa diaria de *¥${reward.toLocaleString()} ${currency}*! (Día *${user.streak}*)\n${msg}`, m, fake)
+conn.reply(m.chat, `「✿」Has reclamado tu recompensa diaria de *¥${reward.toLocaleString()} ${currency}*! (Día *${user.streak}*)\n${msg}`, m)
 }
 
 handler.help = ['daily']
