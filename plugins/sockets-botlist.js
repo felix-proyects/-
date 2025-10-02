@@ -75,7 +75,7 @@ let handler = async (m, { conn }) => {
 
   let txt = `ꕥ Lista de bots activos (*${sesiones}* sesiones)\n\n`
   txt += `✿ Principales » *${totalPrincipales}* sesiones\n`
-  txt += `ⴵ Premiums » *${totalPremium}* sesiones\n`
+  txt += `ⴵ Premiums » *2* sesiones\n`
   txt += `❖ Subs » *${totalSubs}* sesiones\n`
   txt += `✰ Temporales » *${totalTemporales}* sesiones\n\n`
 
